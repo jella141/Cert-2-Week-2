@@ -4,6 +4,11 @@ var context = canvas.getContext("2d");
 var startFrameMillis = Date.now();
 var endFrameMillis = Date.now();
 
+function lerp(value, min, max)
+{
+	return value * (max - mins) + min;
+}
+
 // This function will return the time in seconds since the function 
 // was last called
 // You should only call this function once per frame
@@ -40,32 +45,87 @@ var fps = 0;
 var fpsCount = 0;
 var fpsTime = 0;
 
-// load an image to draw
-var chuckNorris = document.createElement("img");
-chuckNorris.src = "hero.png";
+function initialize(input_level)
+{
+	var return_cells = [];
+	
+	for (var layerIdx = 0; layerIdx < LAYER_COUNT; layerIdx++)
+	{
+		return_cells[layerIdx] = [];
+		var idx = 0;
+		for (var y = 0; y < input_level.layers[layerIdx].height; y++)
+		{
+			return_cells[layerIdx][y] = [];
+			for (var x = 0; x < input_level.layers[layerIdx].width; x++)
+			{
+				if (input_level.layers[layerIdx].data[idx] != 0)
+				{
+					return_cells[layerIdx][y][x] = 1;	
+					return_cells[layerIdx][y][x+1] = 1;							
+					if (y != 0)
+					{
+						return_cells[layerIdx][y-1][x] = 1;
+						return_cells[layerIdx][y-1][x+1] = 1;
+					}
+					
+				}
+				else if (return_cells[layerIdx][y][x] != 1)
+				{
+					return_cells[layerIdx][y][x] = 0;
+				}
+				idx++;
+			}
+		}
+	}
+	return return_cells;
+}
 
+var cells = initialize(level);
 
-	var player = new Player();
-	var keyboard = new Keyboard();
-	var deltaTime = getDeltaTime();
+var keyboard = new Keyboard();
+var player = new Player();
+
+var cam_x = 0;
+var cam_y = 0;
+
 
 function run()
 {
-drawMap();
-	player.update(deltaTime);
-
 	context.fillStyle = "#ccc";		
 	context.fillRect(0, 0, canvas.width, canvas.height);
-
-	player.draw();
-	player.update(deltaTime);
+	
+	var deltaTime = getDeltaTime();
+	
+ 
+	
+	var wanted_cam_x;
+	var wanted_cam_y;
 
 	
-	if (keyboard.isKeyDown(keyboard.KEY_SPACE))
-	{
-		
-	}
-		
+	wanted_cam_x = player.x - SCREEN_WIDTH/2;
+	wanted_cam_y = player.y - SCREEN_HEIGHT/2;
+	
+	
+	if (wanted_cam_x < 0)
+		wanted_cam_x = 0;
+	if (wanted_cam_y < 0)
+		wanted_cam_y = 0;
+	
+	if (wanted_cam_x > MAP.tw * TILE - SCREEN_WIDTH)
+		wanted_cam_x = MAP.tw * TILE - SCREEN_WIDTH;
+	if (wanted_cam_y > MAP.th * TILE - SCREEN_HEIGHT)
+		wanted_cam_y = MAP.th * TILE - SCREEN_HEIGHT;
+	
+		cam_x = Math.floor (lerp(0.5, cam_x, wanted_cam_x));
+		cam_y = Math.floor (lerp(0.5, cam_y, wanted_cam_y));
+
+	drawMap(cam_x, cam_y);
+	
+	//added this	
+	player.update(deltaTime);
+	player.draw(cam_x, cam_y);
+	//added this
+
 	// update the frame counter 
 	fpsTime += deltaTime;
 	fpsCount++;
@@ -81,7 +141,6 @@ drawMap();
 	context.font="14px Arial";
 	context.fillText("FPS: " + fps, 5, 20, 100);
 }
-
 
 //-------------------- Don't modify anything below here
 
