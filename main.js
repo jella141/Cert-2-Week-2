@@ -6,7 +6,7 @@ var endFrameMillis = Date.now();
 
 function lerp(value, min, max)
 {
-	return value * (max - mins) + min;
+	return value * (max - min) + min;
 }
 
 // This function will return the time in seconds since the function 
@@ -37,6 +37,13 @@ function getDeltaTime()
 var SCREEN_WIDTH = canvas.width;
 var SCREEN_HEIGHT = canvas.height;
 
+var background_scale = new Howl (
+{
+	urls: ["background.ogg"],
+	loop: true,
+	buffer: true,
+	volume: 0.5,
+});
 
 // some variables to calculate the Frames Per Second (FPS - this tells use
 // how fast our game is running, and allows us to make the game run at a 
@@ -44,6 +51,9 @@ var SCREEN_HEIGHT = canvas.height;
 var fps = 0;
 var fpsCount = 0;
 var fpsTime = 0;
+
+var background = document.createElement("img");
+background.src = "a_cloud.jpg";
 
 function initialize(input_level)
 {
@@ -88,6 +98,10 @@ var player = new Player();
 var cam_x = 0;
 var cam_y = 0;
 
+var example_emitter = new Emitter();
+
+//example_emitter.Initialise = function (200, 200, 1 , 0, 3000, 1.5, 100);
+
 
 function run()
 {
@@ -96,15 +110,13 @@ function run()
 	
 	var deltaTime = getDeltaTime();
 	
- 
+	context.drawImage(background, 0, 0);
 	
 	var wanted_cam_x;
 	var wanted_cam_y;
-
 	
 	wanted_cam_x = player.x - SCREEN_WIDTH/2;
 	wanted_cam_y = player.y - SCREEN_HEIGHT/2;
-	
 	
 	if (wanted_cam_x < 0)
 		wanted_cam_x = 0;
@@ -116,9 +128,10 @@ function run()
 	if (wanted_cam_y > MAP.th * TILE - SCREEN_HEIGHT)
 		wanted_cam_y = MAP.th * TILE - SCREEN_HEIGHT;
 	
-		cam_x = Math.floor (lerp(0.5, cam_x, wanted_cam_x));
-		cam_y = Math.floor (lerp(0.5, cam_y, wanted_cam_y));
-
+	cam_x = Math.floor(lerp(0.1, cam_x, wanted_cam_x));
+	cam_y = Math.floor(lerp(0.1, cam_y, wanted_cam_y));
+	
+	
 	drawMap(cam_x, cam_y);
 	
 	//added this	
@@ -126,6 +139,9 @@ function run()
 	player.draw(cam_x, cam_y);
 	//added this
 
+	example_emitter.update(deltaTime);
+	example_emitter.draw(cam_x, cam_y);
+	
 	// update the frame counter 
 	fpsTime += deltaTime;
 	fpsCount++;
@@ -137,9 +153,9 @@ function run()
 	}		
 		
 	// draw the FPS
-	context.fillStyle = "#f00";
-	context.font="14px Arial";
-	context.fillText("FPS: " + fps, 5, 20, 100);
+	//context.fillStyle = "#f00";
+	//context.font="14px Arial";
+	//context.fillText("FPS: " + fps, 5, 20, 100);
 }
 
 //-------------------- Don't modify anything below here
@@ -164,8 +180,8 @@ function run()
       setInterval(cb, 1000 / 60);
     }
   }
-  
   window.onEachFrame = onEachFrame;
 })();
+
 
 window.onEachFrame(run);
