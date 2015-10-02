@@ -15,14 +15,18 @@ var JUMP = METER * 1000;
 var LEFT = 0;
 var RIGHT = 1;
 
+var ANIM_CHUCK = 6
 var ANIM_IDLE_LEFT = 0;
 var ANIM_JUMP_LEFT = 1;
 var ANIM_WALK_LEFT = 2;
 var ANIM_IDLE_RIGHT = 3;
 var ANIM_JUMP_RIGHT = 4;
 var ANIM_WALK_RIGHT = 5;
+var ANIM_SHOOT_LEFT = 6;
+var ANIM_SHOOT_RIGHT = 7;
 
-var ANIM_MAX = 6;
+
+var ANIM_MAX = 7;
 
 var Player = function()
 {
@@ -33,7 +37,7 @@ var Player = function()
 	[0,1,2,3,4,5,6,7]);
 	//jump left
 	this.sprite.buildAnimation(12, 8, 165, 126, 0.05,
-	[8,9,10,11,12]);
+	[8,9,10,11,12]);	
 	//walk left
 	this.sprite.buildAnimation(12, 8, 165, 126, 0.05,
 	[13,14,15,16,17,18,19,20,21,22,23,24,25,26]);
@@ -46,6 +50,18 @@ var Player = function()
 	//walk right
 	this.sprite.buildAnimation(12, 8, 165, 126, 0.05,
 	[65,66,67,68,69,70,71,72,73,74,75,76,77,78]);
+	//shoot left
+	this.sprite.buildAnimation(12, 8, 165, 126, 0.05,
+	[29,30,31,32,33,34,35,36,37,38,39,40,41,42]);
+	//shoot right
+	this.sprite.buildAnimation(12, 8, 165, 126, 0.05,
+	[79,80,81,82,83,84,85,86,87,88,89,90,91,92]);
+	
+	
+	
+	var chuck = new ChuckUi();
+	
+	
 	
 	for (var idx = 0; idx < ANIM_MAX; idx++)
 	{
@@ -116,6 +132,8 @@ Player.prototype.update = function(deltaTime)
 	var left, right, jump;
 	left = right = jump = false;
 	
+	
+	
 	if (keyboard.isKeyDown(37))
 	{
 		left = true;
@@ -154,17 +172,39 @@ Player.prototype.update = function(deltaTime)
 		if (right == true)
 			this.sprite.setAnimation(ANIM_JUMP_RIGHT);
 	}
-	
+	/*
+	if(keyboard.isKeyDown(keyboard.KEY_SHIFT))
+	{
+		if (!this.jumping && !this.falling)
+		{
+			if (left == true)
+			{
+				if (this.sprite.currentAnimation != ANIM_SHOOT_LEFT)
+					this.sprite.setAnimation(ANIM_SHOOT_LEFT);
+			}
+			else if (right == true)
+			{
+				if (this.sprite.currentAnimation != ANIM_SHOOT_RIGHT)
+				{
+					this.sprite.setAnimation(ANIM_SHOOT_RIGHT);
+				}
+			}
+				this.shoot = true;
+		}	
+	}
+	*/
+
 	//shooooty shoot shoot
 	if (keyboard.isKeyDown(keyboard.KEY_SHIFT))
 	{
 		if (this.shoot_cooldown <= 0)
 		{
-			if(!this.is_shoot_sfx_playing)
-			{
+			
+			//if(!this.is_shoot_sfx_playing)
+			//{
 			this.shoot_sfx.play();
 			this.is_shoot_sfx_playing = true;
-			}
+		//	}
 			var jitter = Math.random() * 0.2 - 0.1;
 			
 			if (this.direction == LEFT)
@@ -289,13 +329,29 @@ Player.prototype.update = function(deltaTime)
 	
 	if (this.y > MAP.th * TILE + 100)
 	{
+		if(this.lives > 0)
+		{
 		this.x = this.respawn_x;
 		this.y = this.respawn_y;
 		this.lives --;
+		}
 	}
 	
-}
+	if (this.lives == 0)
+	{
+		gameState = STATE_GAMEOVER;
+		return;
+	}
 
+
+
+		
+	if((this.x >= MAP.tw * TILE - TILE * 4) && (this.y >= MAP.th * TILE - TILE * 4))
+	{
+		gameState = STATE_GAMEWIN;
+		return;
+	}
+}	
 Player.prototype.draw = function(_cam_x, _cam_y)
 {
 	this.sprite.draw(context, this.x - _cam_x,
@@ -311,6 +367,7 @@ Player.prototype.draw = function(_cam_x, _cam_y)
 		this.bullets[idx].draw(_cam_x, _cam_y);
 	}
 	
+
 	/*
 	context.save();
 		context.translate(this.x - _cam_x, this.y - _cam_y);

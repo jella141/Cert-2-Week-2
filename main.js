@@ -4,6 +4,16 @@ var context = canvas.getContext("2d");
 var startFrameMillis = Date.now();
 var endFrameMillis = Date.now();
 
+var STATE_SPLASH = 0;
+var STATE_GAME = 1;
+var STATE_GAMEOVER = 2;
+var STATE_GAMEWIN = 3;
+var splashTimer = 10;
+var gameState = STATE_SPLASH;
+
+
+
+
 function lerp(value, min, max)
 {
 	return value * (max - min) + min;
@@ -55,6 +65,12 @@ var fpsTime = 0;
 var background = document.createElement("img");
 background.src = "a_cloud.jpg";
 
+var death_background = document.createElement("img");
+death_background.src = "Chuckdeath.jpg";
+
+var win_background = document.createElement("img");
+win_background.src = "win_background.jpg";
+
 function initialize(input_level)
 {
 	var return_cells = [];
@@ -103,13 +119,9 @@ var example_emitter = new Emitter();
 //example_emitter.Initialise = function (200, 200, 1 , 0, 3000, 1.5, 100);
 
 
-function run()
-{
-	context.fillStyle = "#ccc";		
-	context.fillRect(0, 0, canvas.width, canvas.height);
-	
-	var deltaTime = getDeltaTime();
-	
+
+function runGame(deltaTime)
+{	
 	context.drawImage(background, 0, 0);
 	
 	var wanted_cam_x;
@@ -130,14 +142,13 @@ function run()
 	
 	cam_x = Math.floor(lerp(0.1, cam_x, wanted_cam_x));
 	cam_y = Math.floor(lerp(0.1, cam_y, wanted_cam_y));
-	
-	
+		
 	drawMap(cam_x, cam_y);
 	
-	//added this	
+
 	player.update(deltaTime);
 	player.draw(cam_x, cam_y);
-	//added this
+
 
 	example_emitter.update(deltaTime);
 	example_emitter.draw(cam_x, cam_y);
@@ -151,12 +162,116 @@ function run()
 		fps = fpsCount;
 		fpsCount = 0;
 	}		
+	
+	
 		
 	// draw the FPS
 	//context.fillStyle = "#f00";
 	//context.font="14px Arial";
 	//context.fillText("FPS: " + fps, 5, 20, 100);
+	
+
 }
+
+
+function runSplash(deltaTime)
+{
+	splashTimer -= deltaTime;
+	if(splashTimer <=0)
+	{
+		gameState = STATE_GAME;
+		return;
+	}
+	
+	
+	context.fillStyle = "#ccc";		
+	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(background, 0, 0, canvas.width, canvas.height)
+	
+	context.fillStyle = "#000";
+	context.font = "24px Arial";
+	context.fillText("PLAY", 220, 200);
+	
+	context.font = "17px Arial";
+	context.fillText("Press Shift To Play", 216, 250);
+	
+	if(keyboard.isKeyDown(keyboard.KEY_SHIFT) && (gameState == STATE_SPLASH))
+	{
+		gameState = STATE_GAME;
+		return;
+	}
+
+}
+
+function run()
+{
+	var deltaTime = getDeltaTime();
+		
+	switch(gameState)
+	{
+		case STATE_SPLASH:
+			runSplash(deltaTime);
+			break;
+		case STATE_GAME:
+			runGame(deltaTime);
+			break;
+		case STATE_GAMEOVER:
+			runGameOver(deltaTime);
+			break;
+		case STATE_GAMEWIN:
+			runGameWin(deltaTime);
+			break;
+	}
+}
+
+function runGameOver(deltaTime)
+{
+	context.fillStyle = "#ccc";		
+	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(death_background, 0, 0, canvas.width, canvas.height)
+	
+	context.font = "40px Arial";
+	context.fillStyle = "white";
+	context.fillText("GAME OVER", 200, 200);
+	
+	
+	context.font = "15px Arial";
+	context.fillStyle = "white";
+	context.fillText("Press SHIFT to Restart", 260, 250);
+	
+	if(keyboard.isKeyDown(keyboard.KEY_SHIFT) && (gameState == STATE_GAMEOVER))
+		{
+			gameState = STATE_GAME;
+			player.isDead = false;
+			player.lives = 3;
+			return;
+		}
+}
+
+function runGameWin(deltaTime)
+{
+	context.fillStyle = "#ccc";		
+	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(win_background, 0, 0, canvas.width, canvas.height)
+	
+	context.font = "40px Arial";
+	context.fillStyle = "white";
+	context.fillText("YOU WIN", 240, 200);
+	
+	context.font = "15px Arial";
+	context.fillStyle = "white";
+	context.fillText("Press Shift to restart", 260, 250);
+	
+	if(keyboard.isKeyDown(keyboard.KEY_SHIFT) && (gameState == STATE_GAMEWIN))
+		{
+			gameState = STATE_GAME;
+			player.isDead = false;
+			player.lives = 4;
+			return;
+		}
+}
+
+
 
 //-------------------- Don't modify anything below here
 
