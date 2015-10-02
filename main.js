@@ -264,9 +264,12 @@ function runGameWin(deltaTime)
 	
 	if(keyboard.isKeyDown(keyboard.KEY_SHIFT) && (gameState == STATE_GAMEWIN))
 		{
+			this.x = this.respawn_x;
+			this.y = this.respawn_y;
 			gameState = STATE_GAME;
 			player.isDead = false;
 			player.lives = 4;
+			
 			return;
 		}
 }
