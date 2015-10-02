@@ -47,13 +47,14 @@ function getDeltaTime()
 var SCREEN_WIDTH = canvas.width;
 var SCREEN_HEIGHT = canvas.height;
 
-var background_scale = new Howl (
+var background_sound = new Howl (
 {
 	urls: ["background.ogg"],
 	loop: true,
 	buffer: true,
 	volume: 0.5,
 });
+background_sound.play();
 
 // some variables to calculate the Frames Per Second (FPS - this tells use
 // how fast our game is running, and allows us to make the game run at a 
@@ -123,6 +124,7 @@ var example_emitter = new Emitter();
 function runGame(deltaTime)
 {	
 	context.drawImage(background, 0, 0);
+	
 	
 	var wanted_cam_x;
 	var wanted_cam_y;
@@ -270,7 +272,6 @@ function runGameWin(deltaTime)
 			player.isDead = false;
 			player.lives = 4;
 			
-			return;
 		}
 }
 

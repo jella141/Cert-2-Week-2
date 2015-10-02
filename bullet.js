@@ -25,9 +25,12 @@ Bullet.prototype.fire = function(origin_x, origin_y, dir_x, dir_y)
 }
 
 Bullet.prototype.update = function(deltaTime)
-{
+{	
+
+	
 	if (!this.isDead)
 	{
+	
 		this.x += this.vel_x * deltaTime * BULLET_SPEED;
 		this.y += this.vel_y * deltaTime * BULLET_SPEED;
 		

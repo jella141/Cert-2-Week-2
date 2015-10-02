@@ -26,6 +26,7 @@ var ANIM_SHOOT_LEFT = 6;
 var ANIM_SHOOT_RIGHT = 7;
 
 
+
 var ANIM_MAX = 7;
 
 var Player = function()
@@ -86,8 +87,23 @@ var Player = function()
 	this.respawn_x = this.x;
 	this.respawn_y = this.y;
 	
+	
+
+	
+	this.head_image = document.createElement("img");
+	this.head_image.src = "face 1.png";
+	
+	this.head_image2 = document.createElement("img");
+	this.head_image2.src = "face 2.png";
+	
+	this.head_image3 = document.createElement("img");
+	this.head_image3.src = "face 3.png";
+	
 	this.lives_image = document.createElement("img");
 	this.lives_image.src = "heart.png";
+	
+	
+	
 	
 	//NEW BULLETS
 	this.max_bullets = 50;
@@ -132,6 +148,15 @@ Player.prototype.update = function(deltaTime)
 	var left, right, jump;
 	left = right = jump = false;
 	
+	if (this.lives == 2)
+	{
+		this.head_image = this.head_image2;
+	}
+	else if (this.lives == 1)
+	{
+		this.head_image = this.head_image3;
+	}
+	
 	
 	
 	if (keyboard.isKeyDown(37))
@@ -164,6 +189,9 @@ Player.prototype.update = function(deltaTime)
 			}
 		}
 	}
+	
+	
+	
 	if (keyboard.isKeyDown(keyboard.KEY_SPACE))
 	{
 		jump = true;
@@ -354,12 +382,34 @@ Player.prototype.update = function(deltaTime)
 }	
 Player.prototype.draw = function(_cam_x, _cam_y)
 {
+
+	context.drawImage(this.head_image,2, 1)
+	
+		if (this.lives == 3)
+		{
+		context.drawImage(this.head_image,2, 1);
+		}
+		else if (this.lives == 2)
+		{
+		context.drawImage(this.head_image2,3,1);
+		}
+		else if (this.lives == 1)
+		{
+		context.drawImage(this.head_image3,3,1);
+		}
+		else if (this.lives <= 0)
+		{
+		context.drawImage(this.head_image,2, 1);
+
+		}
+		
+	
 	this.sprite.draw(context, this.x - _cam_x,
 							  this.y - _cam_y);
 	
 	for (var idx = 0; idx < this.lives; idx++)
 	{
-		context.drawImage(this.lives_image, 40 + idx * (this.lives_image.width), 40);
+		context.drawImage(this.lives_image, 100 + idx * (this.lives_image.width), 40);
 	}
 	
 	for (var idx = 0; idx < this.max_bullets; idx++)
